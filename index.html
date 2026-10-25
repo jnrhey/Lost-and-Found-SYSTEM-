@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CvSU Bacoor - Lost & Found Portal</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cvsu-green: #006633;
+            --cvsu-gold: #FFC72C;
+        }
+        body {
+            background-color: #f4f6f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-cvsu {
+            background-color: var(--cvsu-green);
+        }
+        .btn-cvsu {
+            background-color: var(--cvsu-green);
+            color: white;
+            border: 1px solid var(--cvsu-green);
+        }
+        .btn-cvsu:hover {
+            background-color: #005228;
+            color: white;
+        }
+        /* Requested Logout Button Hover Effect: Turns red smoothly */
+        .btn-logout {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-logout:hover {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #dc3545 !important;
+        }
+        .badge-status-lost {
+            background-color: #dc3545;
+        }
+        .badge-status-found {
+            background-color: #198754;
+        }
+        .badge-status-claimed {
+            background-color: #6c757d;
+        }
+        .card-item {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cvsu shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fa-solid fa-graduation-cap me-2"></i>CvSU Bacoor | Lost & Found
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item"><a class="nav-link active" href="#feed">Browse Feed</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#reportModal">Report Item</a></li>
+                    <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                        <span class="text-white small me-2"><i class="fa-solid fa-user-circle me-1"></i>Student Account</span>
+                        <button class="btn btn-light btn-sm text-success fw-semibold btn-logout" onclick="handleLogout()">Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-5" id="feed">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h2>Campus Item Feed</h2>
+                <p class="text-muted mb-0">Browse recently lost, found, or successfully claimed items across CvSU Bacoor campus.</p>
+            </div>
+            <div class="col-md-6 mt-3 mt-md-0">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search items (e.g., AirPods, ID lace, calculator)..." onkeyup="filterItems()">
+                    <select id="statusFilter" class="form-select" style="max-width: 150px;" onchange="filterItems()">
+                        <option value="all">All Status</option>
+                        <option value="lost">Lost</option>
+                        <option value="found">Found</option>
+                        <option value="claimed">Claimed</option>
+                    </select>
+                    <button class="btn btn-cvsu" type="button"><i class="fa-solid fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4" id="itemGrid">
+            <!-- Dynamic item cards rendered by JS -->
+        </div>
+    </main>
+
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white" id="detailsModalHeader">
+                    <h5 class="modal-title" id="detailsModalTitle"><i class="fa-solid fa-circle-info me-2"></i>Item Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3" id="detailsModalImageContainer">
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 160px;">
+                            <i class="fa-solid fa-image fa-3x text-muted" id="detailsModalIcon"></i>
+                        </div>
+                    </div>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold text-muted">Status:</span>
+                            <span id="detailsModalStatus" class="badge"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold text-muted">Category:</span>
+                            <span id="detailsModalCategory" class="text-dark"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold text-muted">Location:</span>
+                            <span id="detailsModalLocation" class="text-dark"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold text-muted">Date Reported:</span>
+                            <span id="detailsModalDate" class="text-dark"></span>
+                        </li>
+                    </ul>
+                    <div class="mb-3">
+                        <label class="fw-semibold text-muted small uppercase d-block mb-1">Description:</label>
+                        <p id="detailsModalDescription" class="p-2 bg-light rounded text-secondary mb-0"></p>
+                    </div>
+                    
+                    <!-- Handover Log Section for Claimed Items -->
+                    <div id="detailsHandoverSection" class="p-3 bg-light border rounded d-none">
+                        <h6 class="text-success fw-bold mb-2"><i class="fa-solid fa-handshake-angle me-1"></i> Official Handover Log</h6>
+                        <ul class="list-unstyled small mb-0">
+                            <li><strong>Owner Claimed By:</strong> <span id="detailsClaimOwner"></span></li>
+                            <li><strong>Released / Handed Over By:</strong> <span id="detailsAdminHandler"></span></li>
+                            <li><strong>Date Claimed:</strong> <span id="detailsClaimDate"></span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success btn-sm" id="detailsModalActionBtn" onclick="switchToClaimModalFromDetails()">Claim / Inquire</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="claimModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fa-solid fa-hand-holding-heart me-2"></i>Claim / Inquire about Item</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="claimForm" onsubmit="submitClaim(event)">
+                        <input type="hidden" id="claimItemId">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Target Item</label>
+                            <input type="text" id="claimItemName" class="form-control bg-light" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Your Full Name (Owner)</label>
+                            <input type="text" class="form-control" id="claimantName" placeholder="e.g., Juan Dela Cruz" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">CvSU Student / Staff Email</label>
+                            <input type="email" class="form-control" id="claimantEmail" placeholder="e.g., student@cvsu.edu.ph" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Contact Number</label>
+                            <input type="text" class="form-control" id="claimantContact" placeholder="e.g., 09123456789" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-success"><i class="fa-solid fa-shield-halved me-1"></i> Proof of Ownership / Secret Mark</label>
+                            <textarea class="form-control" id="claimantProof" rows="3" placeholder="Describe specific marks, contents, serial number, etc., to verify ownership..." required></textarea>
+                            <div class="form-text text-muted small">Campus security will verify this detail before logging the handover.</div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-cvsu">Submit Claim / Verify</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fa-solid fa-bullhorn me-2"></i>Report Lost or Found Item</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reportForm" onsubmit="submitReport(event)">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Report Type</label>
+                                <select id="reportType" class="form-select" required>
+                                    <option value="lost">I Lost an Item</option>
+                                    <option value="found" selected>I Found an Item</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Item Name</label>
+                                <input type="text" id="reportName" class="form-control" placeholder="e.g., Flash Drive, Tumbler" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Category</label>
+                                <select id="reportCategory" class="form-select">
+                                    <option>Electronics / Gadgets</option>
+                                    <option>IDs / Documents</option>
+                                    <option>Tumblers / Bottles</option>
+                                    <option>Clothing / Accessories</option>
+                                    <option>Others</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Location Last Seen / Found</label>
+                                <input type="text" id="reportLocation" class="form-control" placeholder="e.g., Room 302, Canteen, Lobby" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Description</label>
+                                <textarea id="reportDesc" class="form-control" rows="3" placeholder="Provide general colors, brands, or distinguishing details..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <div class="p-3 bg-light border rounded">
+                                    <label class="form-label text-success fw-bold"><i class="fa-solid fa-shield-halved me-1"></i> Secret Identifying Mark / Proof Details</label>
+                                    <input type="text" id="reportSecret" class="form-control" placeholder="e.g., Scratch near charging port, specific sticker">
+                                    <div class="form-text text-muted">This info is hidden from public view and used strictly by admins to verify ownership.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer px-0 pb-0 mt-3">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-cvsu">Submit Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initial dataset containing Found, Lost, and Claimed items
+        let items = [
+            {
+                id: 1,
+                name: "Casio Scientific Calculator",
+                status: "found",
+                location: "Near ComLab 2, 2nd Floor",
+                description: "Found a black FX-991ES PLUS calculator left on the desk after the morning lecture.",
+                date: "Sep 14, 2026",
+                category: "Electronics / Gadgets",
+                secretMark: "Has student initials engraved on back battery cover.",
+                handoverLog: null
+            },
+            {
+                id: 2,
+                name: "CvSU Student ID Lace",
+                status: "lost",
+                location: "Canteen Area",
+                description: "Green CvSU lanyard with BSCS Department ID tag attached. Has a small metal ring.",
+                date: "Sep 13, 2026",
+                category: "IDs / Documents",
+                secretMark: "Contains ID pocket with sticker of programming meme.",
+                handoverLog: null
+            },
+            {
+                id: 3,
+                name: "Hydro Flask Tumbler",
+                status: "found",
+                location: "Gymnasium Bleachers",
+                description: "Black 32oz insulated water bottle with various tech stickers on it.",
+                date: "Sep 12, 2026",
+                category: "Tumblers / Bottles",
+                secretMark: "Green silicone boot at the bottom with a dent near the lid.",
+                handoverLog: null
+            },
+            {
+                id: 4,
+                name: "Apple AirPods Pro (Charging Case)",
+                status: "claimed",
+                location: "Admin Building Lobby",
+                description: "White wireless charging case with custom engraved initials 'J.M.'. Successfully claimed by rightful owner.",
+                date: "Sep 10, 2026",
+                category: "Electronics / Gadgets",
+                secretMark: "Serial number verified against Apple ID receipt.",
+                handoverLog: {
+                    ownerName: "John Carlo Sol (BSIT 3-2)",
+                    handlerName: "Mr. Vince Balis (Campus Security Officer)",
+                    dateClaimed: "Sep 11, 2026"
+                }
+            }
+        ];
+
+        let activeDetailsItem = null;
+
+        // Render items to the grid
+        function renderItems(itemsToRender) {
+            const grid = document.getElementById('itemGrid');
+            grid.innerHTML = '';
+
+            if (itemsToRender.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fa-solid fa-folder-open fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No items found matching your search criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            itemsToRender.forEach(item => {
+                const isFound = item.status === 'found';
+                const isClaimed = item.status === 'claimed';
+                
+                let badgeClass = 'badge-status-found';
+                if (item.status === 'lost') badgeClass = 'badge-status-lost';
+                if (isClaimed) badgeClass = 'badge-status-claimed';
+
+                let btnClass = isFound ? 'btn-outline-success' : (isClaimed ? 'btn-secondary' : 'btn-outline-danger');
+                let btnText = isFound ? 'Claim / Inquire' : (isClaimed ? 'View Handover' : 'View Details');
+                let isDisabled = isClaimed ? 'disabled' : '';
+
+                const cardHtml = `
+                    <div class="col-md-4">
+                        <div class="card card-item h-100 shadow-sm border-0">
+                            <div class="position-relative">
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 180px;">
+                                    <i class="fa-solid fa-image fa-3x text-muted"></i>
+                                </div>
+                                <span class="badge ${badgeClass} position-absolute top-0 end-0 m-2 text-uppercase">${item.status}</span>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fw-bold">${item.name}</h5>
+                                <p class="card-text text-muted small mb-2"><i class="fa-solid fa-location-dot me-1"></i> ${item.location}</p>
+                                <p class="card-text small text-secondary flex-grow-1">${item.description}</p>
+                                ${isClaimed ? `<div class="p-2 mb-2 bg-light rounded small text-muted border"><i class="fa-solid fa-handshake text-success me-1"></i> Claimed by ${item.handoverLog.ownerName}</div>` : ''}
+                                <hr class="text-muted my-2">
+                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                    <span class="small text-muted">${item.date}</span>
+                                    <div>
+                                        <button class="btn btn-outline-secondary btn-sm me-1" onclick="openDetailsModal(${item.id})" title="View Details">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button class="btn ${btnClass} btn-sm" onclick="openClaimModal(${item.id})" ${isDisabled}>
+                                            ${btnText}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // Filter items based on search input and status dropdown
+        function filterItems() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const statusVal = document.getElementById('statusFilter').value;
+
+            const filtered = items.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(query) || 
+                                      item.location.toLowerCase().includes(query) || 
+                                      item.description.toLowerCase().includes(query);
+                const matchesStatus = statusVal === 'all' || item.status === statusVal;
+                return matchesSearch && matchesStatus;
+            });
+
+            renderItems(filtered);
+        }
+
+        // Open View Details Modal with Handover Log support
+        function openDetailsModal(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            activeDetailsItem = item;
+
+            document.getElementById('detailsModalTitle').innerHTML = `<i class="fa-solid fa-circle-info me-2"></i>${item.name}`;
+            
+            const badgeEl = document.getElementById('detailsModalStatus');
+            badgeEl.textContent = item.status.toUpperCase();
+            if (item.status === 'found') badgeEl.className = 'badge badge-status-found';
+            else if (item.status === 'lost') badgeEl.className = 'badge badge-status-lost';
+            else badgeEl.className = 'badge badge-status-claimed';
+
+            document.getElementById('detailsModalCategory').textContent = item.category || 'General';
+            document.getElementById('detailsModalLocation').textContent = item.location;
+            document.getElementById('detailsModalDate').textContent = item.date;
+            document.getElementById('detailsModalDescription').textContent = item.description;
+
+            const handoverSection = document.getElementById('detailsHandoverSection');
+            const actionBtn = document.getElementById('detailsModalActionBtn');
+
+            if (item.status === 'claimed' && item.handoverLog) {
+                handoverSection.classList.remove('d-none');
+                document.getElementById('detailsClaimOwner').textContent = item.handoverLog.ownerName;
+                document.getElementById('detailsAdminHandler').textContent = item.handoverLog.handlerName;
+                document.getElementById('detailsClaimDate').textContent = item.handoverLog.dateClaimed;
+                actionBtn.textContent = 'Item Already Claimed';
+                actionBtn.disabled = true;
+                actionBtn.className = 'btn btn-secondary btn-sm';
+            } else {
+                handoverSection.classList.add('d-none');
+                actionBtn.disabled = false;
+                actionBtn.className = 'btn btn-success btn-sm';
+                actionBtn.textContent = item.status === 'found' ? 'Claim / Inquire' : 'Inquire / Report Info';
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+            modal.show();
+        }
+
+        // Switch from details modal to claim modal
+        function switchToClaimModalFromDetails() {
+            const detailsModalEl = document.getElementById('detailsModal');
+            const detailsModalInstance = bootstrap.Modal.getInstance(detailsModalEl);
+            detailsModalInstance.hide();
+
+            if (activeDetailsItem && activeDetailsItem.status !== 'claimed') {
+                openClaimModal(activeDetailsItem.id);
+            }
+        }
+
+        // Open Claim / Inquire Modal
+        function openClaimModal(id) {
+            const item = items.find(i => i.id === id);
+            if (!item || item.status === 'claimed') return;
+
+            document.getElementById('claimItemId').value = item.id;
+            document.getElementById('claimItemName').value = item.name + ' (' + item.status.toUpperCase() + ' - ' + item.location + ')';
+            document.getElementById('claimantName').value = '';
+            document.getElementById('claimantEmail').value = '';
+            document.getElementById('claimantContact').value = '';
+            document.getElementById('claimantProof').value = '';
+
+            const modal = new bootstrap.Modal(document.getElementById('claimModal'));
+            modal.show();
+        }
+
+        // Submit Claim with Handover Log generation
+        function submitClaim(e) {
+            e.preventDefault();
+            const itemId = parseInt(document.getElementById('claimItemId').value);
+            const name = document.getElementById('claimantName').value;
+            const itemTitle = document.getElementById('claimItemName').value;
+
+            // Update item to claimed state with handover log example
+            const itemIndex = items.findIndex(i => i.id === itemId);
+            if (itemIndex !== -1) {
+                items[itemIndex].status = 'claimed';
+                items[itemIndex].handoverLog = {
+                    ownerName: name,
+                    handlerName: "CvSU Admin / Security Desk Officer",
+                    dateClaimed: "Today, 2026"
+                };
+            }
+
+            filterItems();
+
+            const modalEl = document.getElementById('claimModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            modalInstance.hide();
+
+            showCustomToast(`Handover verified successfully! Item marked as <strong>CLAIMED</strong> and handed over to <strong>${name}</strong>.`);
+        }
+
+        // Submit New Report
+        function submitReport(e) {
+            e.preventDefault();
+            const type = document.getElementById('reportType').value;
+            const name = document.getElementById('reportName').value;
+            const category = document.getElementById('reportCategory').value;
+            const location = document.getElementById('reportLocation').value;
+            const desc = document.getElementById('reportDesc').value;
+            const secret = document.getElementById('reportSecret').value;
+
+            const newItem = {
+                id: items.length + 1,
+                name: name,
+                status: type,
+                location: location,
+                description: desc || 'No additional description provided.',
+                date: 'Just now',
+                category: category,
+                secretMark: secret,
+                handoverLog: null
+            };
+
+            items.unshift(newItem);
+            filterItems();
+
+            const modalEl = document.getElementById('reportModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            modalInstance.hide();
+
+            document.getElementById('reportForm').reset();
+            showCustomToast(`Your report for "<strong>${name}</strong>" has been posted successfully to the campus feed!`);
+        }
+
+        // Logout simulation
+        function handleLogout() {
+            showCustomToast("You have been logged out successfully. Redirecting to login portal...");
+        }
+
+        // Custom notification toast container
+        function showCustomToast(message) {
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.className = 'position-fixed bottom-0 end-0 p-3';
+                toastContainer.style.zIndex = '1080';
+                document.body.appendChild(toastContainer);
+            }
+
+            const toastId = 'toast-' + Date.now();
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white bg-success border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fa-solid fa-circle-check me-2"></i> ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toastElement = document.getElementById(toastId);
+            const bsToast = new bootstrap.Toast(toastElement, { delay: 5000 });
+            bsToast.show();
+        }
+
+        // Initialize feed on load
+        window.onload = function() {
+            renderItems(items);
+        };
+    </script>
+</body>
+</html>

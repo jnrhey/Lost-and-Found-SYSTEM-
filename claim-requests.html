@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CvSU Bacoor - Claim Requests</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cvsu-green: #006633;
+            --cvsu-gold: #FFC72C;
+        }
+        body {
+            background-color: #f4f6f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-cvsu { background-color: var(--cvsu-green); }
+        .btn-cvsu { background-color: var(--cvsu-green); color: white; }
+        .btn-cvsu:hover { background-color: #005228; color: white; }
+        .sidebar {
+            background-color: #ffffff;
+            min-height: calc(100vh - 56px);
+            border-right: 1px solid #dee2e6;
+        }
+        .sidebar .nav-link {
+            color: #333; padding: 12px 20px; font-weight: 500; border-radius: 4px; margin-bottom: 4px;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: var(--cvsu-green); color: white;
+        }
+        .sidebar .nav-link i { width: 24px; }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cvsu shadow-sm">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fa-solid fa-shield-halved me-2"></i>CvSU Bacoor | Admin Portal
+            </a>
+            <div class="collapse navbar-collapse justify-content-end">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item me-3">
+                        <span class="text-white small"><i class="fa-solid fa-bell me-1"></i><span class="badge bg-warning text-dark">3</span> Pending Claims</span>
+                    </li>
+                    <li class="nav-item">
+                        <span class="text-white small me-2"><i class="fa-solid fa-user-tie me-1"></i>Administrator</span>
+                        <button class="btn btn-light btn-sm text-success fw-semibold">Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse p-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link" href="/dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/manage-item.html"><i class="fa-solid fa-box-archive"></i> Manage Items</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/claim-requests.html"><i class="fa-solid fa-hand-holding-heart"></i> Claim Requests <span class="badge bg-danger ms-auto">3</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="/users.html"><i class="fa-solid fa-users"></i> Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/settings.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Verify Claim Requests</h1>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Claim Request Card 1 -->
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card shadow-sm border-0 h-150">
+                            <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center">
+                                <span><i class="fa-solid fa-clock me-1"></i> Pending Verification</span>
+                                <small>Sept 13, 2026</small>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title text-success fw-bold">Casio Scientific Calculator</h5>
+                                <p class="card-text small text-muted mb-2">Claimed by: <strong>Maria Santos (BSCS 3-4)</strong></p>
+                                <p class="card-text small mb-3"><strong>Proof / Details Provided:</strong> "I left it at table 4 inside the engineering lab. It has a tiny scratch near the battery cover and my initials sticker under the cover."</p>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-success btn-sm w-50"><i class="fa-solid fa-check me-1"></i> Approve</button>
+                                    <button class="btn btn-outline-danger btn-sm w-50"><i class="fa-solid fa-xmark me-1"></i> Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Claim Request Card 2 -->
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card shadow-sm border-0 h-150">
+                            <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center">
+                                <span><i class="fa-solid fa-clock me-1"></i> Pending Verification</span>
+                                <small>Sept 12, 2026</small>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title text-success fw-bold">JBL Wireless Earbuds</h5>
+                                <p class="card-text small text-muted mb-2">Claimed by: <strong>Mark Angelo Reyes</strong></p>
+                                <p class="card-text small mb-3"><strong>Proof / Details Provided:</strong> "Left inside the male comfort room near the AVR. Serial number ends with 4982."</p>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-success btn-sm w-50"><i class="fa-solid fa-check me-1"></i> Approve</button>
+                                    <button class="btn btn-outline-danger btn-sm w-50"><i class="fa-solid fa-xmark me-1"></i> Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
